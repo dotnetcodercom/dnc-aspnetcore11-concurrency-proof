@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DNC | ASP.NET Core concurrency proof</title>
+<style>
+:root{font-family:Segoe UI,Arial,sans-serif;color:#24243b;background:#f4f3fa}*{box-sizing:border-box}body{margin:0}main{max-width:1080px;margin:38px auto;padding:0 24px}.brand{font-size:13px;color:#6248bc;font-weight:700;letter-spacing:.1em}h1{font-size:34px;margin:12px 0}p{line-height:1.6;color:#56566b}section{background:white;border:1px solid #dedbea;border-radius:14px;padding:24px;margin:20px 0}.toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}button{border:0;border-radius:8px;background:#512bd4;color:white;padding:12px 22px;font-size:16px;font-weight:600;cursor:pointer}button:disabled{opacity:.55;cursor:wait}a{color:#512bd4}.pill{background:#ece8fa;padding:8px 12px;border-radius:20px;font-weight:600}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}.metric{padding:18px;background:#f6f5fb;border-radius:10px}.metric strong{font-size:28px;display:block}.metric span{font-size:13px;color:#626176}.result{font-size:23px;font-weight:700}.pass{color:#147344}.fail{color:#b02e37}.pending{color:#706584}table{width:100%;border-collapse:collapse}td,th{padding:12px;text-align:left;border-bottom:1px solid #eceaf2;font-size:14px}.detail{white-space:pre-wrap;overflow-wrap:anywhere;background:#f6f5fb;padding:14px;border-radius:8px;font-size:12px}summary{cursor:pointer}.hint{font-size:13px}.hidden{display:none}@media(max-width:650px){h1{font-size:27px}.metrics{grid-template-columns:1fr}main{padding:0 14px}}
+</style></head>
+<body><main>
+<div class="brand">DOTNETCODER · LOCAL EXECUTABLE PROOF</div>
+<h1>ASP.NET Core concurrency limiting</h1>
+<p>Hold two real HTTP handlers, queue one request, and reject the next with HTTP 429. Then verify permit reuse and queued cancellation.</p>
+<section><div class="toolbar"><button id="run">Run verification</button><span id="runtime" class="pill">Connecting…</span><a id="download" class="hidden" href="/proof/receipt">Download receipt</a></div>
+<div class="metrics"><div class="metric"><strong>2</strong><span>Permit limit · one process</span></div><div class="metric"><strong>1</strong><span>Queue slot · OldestFirst</span></div><div class="metric"><strong>429</strong><span>Configured rejection status</span></div></div>
+<p class="hint">These are configured limits. Measured outcomes appear below only after the test runs.</p></section>
+<section><div id="status" class="result pending">NOT RUN</div><p id="meta">Click Run verification. Results come from the running ASP.NET Core server.</p>
+<table id="checks" class="hidden"><thead><tr><th>Result</th><th>Observed check</th></tr></thead><tbody></tbody></table>
+<details id="details" class="hidden"><summary>Measured evidence and source fingerprints</summary><pre class="detail" id="json"></pre></details></section>
+<p class="hint">Migration target proof only. Legacy middleware compatibility, production throughput and cross-instance limits are outside this test. No Azure or Docker is used. Screenshots should include the final status, check list and runtime.</p>
+</main><script>
+const run=document.getElementById('run'),status=document.getElementById('status'),meta=document.getElementById('meta');
+function render(r){status.textContent=r.status+' · '+r.checks.filter(c=>c.pass).length+'/'+r.checks.length+' checks';status.className='result '+(r.status==='PASS'?'pass':'fail');meta.textContent=r.runtime+' · Run '+r.runId+' · '+r.finishedAt;const body=document.querySelector('tbody');body.replaceChildren();for(const c of r.checks){const tr=document.createElement('tr'),a=document.createElement('td'),b=document.createElement('td');a.textContent=c.pass?'PASS':'FAIL';a.className=c.pass?'pass':'fail';b.textContent=c.name;tr.append(a,b);body.append(tr)}document.getElementById('checks').classList.remove('hidden');document.getElementById('details').classList.remove('hidden');document.getElementById('json').textContent=JSON.stringify(r,null,2);document.getElementById('download').classList.remove('hidden')}
+run.addEventListener('click',async()=>{run.disabled=true;status.textContent='RUNNING';status.className='result pending';meta.textContent='Sending real loopback HTTP requests. This usually takes a few seconds.';try{const response=await fetch('/proof/run',{method:'POST',headers:{'X-DNC-Proof':'1'}});if(!response.ok)throw new Error('HTTP '+response.status);render(await response.json())}catch(e){status.textContent='ERROR';status.className='result fail';meta.textContent=String(e)}finally{run.disabled=false}});
+fetch('/proof/info').then(r=>r.json()).then(i=>{document.getElementById('runtime').textContent=i.runtime});fetch('/proof/result').then(r=>r.ok?r.json():null).then(r=>{if(r)render(r)});
+</script></body></html>
