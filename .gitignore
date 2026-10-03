@@ -1,0 +1,6 @@
+**/bin/
+**/obj/
+evidence/
+**/evidence/
+.vs/
+*.user
